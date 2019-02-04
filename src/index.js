@@ -17,11 +17,9 @@ const request = requestFactory({
 })
 
 const vendor = 'thomann'
-const currency = '€'
 const baseUrl = 'https://www.thomann.de'
-const loginUrl = `${baseUrl}/fr/mythomann_login.html`
-const logoutUrl = `${baseUrl}/fr/mythomann_logout.html`
-const ordersListUrl = `${baseUrl}/fr/mythomann_orderlist.html`
+const loginUrl = `${baseUrl}/intl/mythomann_login.html`
+const ordersListUrl = `${baseUrl}/intl/mythomann_orderlist.html`
 
 module.exports = new BaseKonnector(start)
 
@@ -57,7 +55,7 @@ function authenticate(username, password) {
       passw: password
     },
     validate: (statusCode, $) => {
-      if ($(`a[href='${logoutUrl}']`).length === 1) {
+      if ($('svg.rs-icon-cc-sb-logout').length === 1) {
         return true
       } else {
         return false
@@ -83,6 +81,10 @@ async function parseDocuments($) {
         sel: '.order-sum',
         parse: amount => parseAmount(amount)
       },
+      currency: {
+        sel: '.order-sum',
+        parse: currency => parseCurrency(currency)
+      },
       details: {
         sel: '.details a',
         attr: 'href'
@@ -104,7 +106,7 @@ async function parseDocuments($) {
       vendor: vendor,
       date: order.date.toDate(),
       amount: order.amount,
-      currency: currency,
+      currency: order.currency,
       fileurl: order.pdf,
       filename: filename,
       metadata: {
@@ -117,11 +119,16 @@ async function parseDocuments($) {
 
 function parseAmount(price) {
   const amountStr = price
-    .slice(price.indexOf(':') + 1, price.length)
-    .replace(currency, '')
-    .replace(',', '.')
     .trim()
+    .slice(price.indexOf(':') + 1, price.length)
+    .slice(0, price.length - 1)
+    .replace(',', '.')
+
   return parseFloat(amountStr)
+}
+
+function parseCurrency(price) {
+  return price.trim()[price.length - 1]
 }
 
 function parseDate(date) {
