@@ -85,6 +85,6 @@
       }
     }
   },
-  "banksTransactionRegExp": "thomann",
+  "banksTransactionRegExp": "\\bthomann\\b",
   "manifest_version": "2"
 }
