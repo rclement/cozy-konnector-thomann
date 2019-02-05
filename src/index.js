@@ -93,8 +93,7 @@ async function parseDocuments($) {
     '.order-entry'
   )
 
-  for (let i = 0; i < orders.length; ++i) {
-    let order = orders[i]
+  for (let order of orders) {
     const $details = await request(order.details)
     order['pdf'] = $details('.orderdata a.tr-link-pdf').attr('href')
   }
