@@ -72,18 +72,18 @@ async function parseDocuments($) {
     {
       date: {
         sel: '.order-date',
-        parse: date => parseDate(date)
+        parse: parseDate
       },
       number: {
         sel: '.order-nr'
       },
       amount: {
         sel: '.order-sum',
-        parse: amount => parseAmount(amount)
+        parse: parseAmount
       },
       currency: {
         sel: '.order-sum',
-        parse: currency => parseCurrency(currency)
+        parse: parseCurrency
       },
       details: {
         sel: '.details a',
@@ -93,27 +93,29 @@ async function parseDocuments($) {
     '.order-entry'
   )
 
+  let documents = []
   for (let order of orders) {
     const $details = await request(order.details)
-    order['pdf'] = $details('.orderdata a.tr-link-pdf').attr('href')
-  }
+    const fileurl = $details('.orderdata a.tr-link-pdf').attr('href')
+    const filename = `${order.date.format(
+      'YYYY-MM-DD'
+    )}_${vendor}_${order.amount.toFixed(2)}${order.currency}.pdf`
 
-  return orders.map(order => {
-    const filename = `${order.date.format('YYYY-MM-DD')}_${vendor}.pdf`
-
-    return {
+    documents.push({
       vendor: vendor,
       date: order.date.toDate(),
       amount: order.amount,
       currency: order.currency,
-      fileurl: order.pdf,
+      fileurl: fileurl,
       filename: filename,
       metadata: {
         importDate: new Date(),
         version: 1
       }
-    }
-  })
+    })
+  }
+
+  return documents
 }
 
 function parseAmount(price) {
