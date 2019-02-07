@@ -75,7 +75,8 @@ async function parseDocuments($) {
         parse: parseDate
       },
       number: {
-        sel: '.order-nr'
+        sel: '.order-nr',
+        parse: parseOrderNumber
       },
       amount: {
         sel: '.order-sum',
@@ -99,7 +100,9 @@ async function parseDocuments($) {
     const fileurl = $details('.orderdata a.tr-link-pdf').attr('href')
     const filename = `${order.date.format(
       'YYYY-MM-DD'
-    )}_${vendor}_${order.amount.toFixed(2)}${order.currency}.pdf`
+    )}_${vendor}_${order.amount.toFixed(2)}${order.currency}_${
+      order.number
+    }.pdf`
 
     documents.push({
       vendor: vendor,
@@ -116,6 +119,10 @@ async function parseDocuments($) {
   }
 
   return documents
+}
+
+function parseOrderNumber(number) {
+  return number.slice(number.lastIndexOf(' ') + 1).trim()
 }
 
 function parseAmount(price) {
